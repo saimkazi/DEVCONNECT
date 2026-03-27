@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DevConnect — Find Developers</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-brand">Dev<span>Connect</span></a>
+    <a href="index.html"        class="nav-link active">Browse</a>
+    <a href="search.html" class="nav-link">Search</a>
+
+    <a href="login.html"  class="btn-ghost" id="nav-login">Log in</a>
+    <a href="signup.html" class="btn-accent" id="nav-signup">Sign up</a>
+
+    <div class="user-menu-wrap" id="nav-user" style="display:none">
+      <button class="user-menu-trigger" id="nav-user-trigger">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span id="nav-username"></span>
+        <svg width="9" height="5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 9 5"><path d="M1 1l3.5 3L8 1"/></svg>
+      </button>
+      <div class="user-dropdown" id="nav-user-dropdown">
+        <a href="profile.html">My CV</a>
+        <a href="edit-cv.html">Edit CV</a>
+        <hr>
+        <button id="btn-logout">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eye">Developer Directory</div>
+    <h1>Find and connect with<br><em>talented developers</em></h1>
+    <p>Browse developer CVs — skills, education, and portfolio links all in one place.</p>
+    <div class="hero-btns">
+      <a href="#browse" class="btn btn-primary">Browse CVs</a>
+      <a href="signup.html" class="btn btn-secondary" id="hero-cta">Create your CV</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-n" id="stat-devs">—</div><div class="stat-l">Developers</div></div>
+      <div><div class="stat-n">100%</div><div class="stat-l">Free</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Search -->
+<div class="search-wrap" id="browse">
+  <div class="container">
+    <div class="search-bar">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--dim);flex-shrink:0">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" id="search-input" placeholder="Search by name or skill…" autocomplete="off">
+      <select id="skill-filter">
+        <option value="">All skills</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Grid -->
+<section class="grid-section">
+  <div class="container">
+    <div class="grid-header">
+      <h2>All Developers</h2>
+      <span id="cv-count"></span>
+    </div>
+    <div class="cv-grid" id="cv-grid"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-brand">Dev<span>Connect</span></span>
+    <span class="footer-text">© <script>document.write(new Date().getFullYear())</script> DevConnect</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+  let allCVs = [];
+
+  async function init() {
+    const user = await loadAuth();
+
+    if (user) {
+      document.getElementById('hero-cta').textContent = 'Edit my CV';
+      document.getElementById('hero-cta').href = 'edit-cv.html';
+    }
+
+    // Load CVs
+    try {
+      const data = await get('/api/cvs');
+      allCVs = data.cvs;
+      document.getElementById('stat-devs').textContent = allCVs.length;
+      renderCards(allCVs);
+
+      // Build skill filter options
+      const allSkills = [...new Set(allCVs.flatMap(cv => cv.skills))].sort();
+      const sel = document.getElementById('skill-filter');
+      allSkills.forEach(s => {
+        const o = document.createElement('option');
+        o.value = s; o.textContent = s;
+        sel.appendChild(o);
+      });
+    } catch (e) {
+      document.getElementById('cv-grid').innerHTML =
+        `<div class="empty" style="grid-column:1/-1"><h3>Couldn't load CVs</h3><p>${esc(e.message)}</p></div>`;
+    }
+  }
+
+  function renderCards(cvs) {
+    const grid = document.getElementById('cv-grid');
+    grid.innerHTML = '';
+    document.getElementById('cv-count').textContent = `${cvs.length} developer${cvs.length !== 1 ? 's' : ''}`;
+
+    if (!cvs.length) {
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1">
+        <h3>No developers found</h3>
+        <p>Try a different search.</p>
+      </div>`;
+      return;
+    }
+    cvs.forEach(cv => grid.appendChild(makeCard(cv)));
+  }
+
+  // Live filter
+  function filter() {
+    const q     = document.getElementById('search-input').value.toLowerCase();
+    const skill = document.getElementById('skill-filter').value.toLowerCase();
+    const filtered = allCVs.filter(cv => {
+      const text = [cv.full_name, cv.description, ...(cv.skills || [])].join(' ').toLowerCase();
+      return (!q || text.includes(q)) && (!skill || (cv.skills || []).map(s => s.toLowerCase()).includes(skill));
+    });
+    renderCards(filtered);
+  }
+
+  document.getElementById('search-input').addEventListener('input', filter);
+  document.getElementById('skill-filter').addEventListener('change', filter);
+
+  init();
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CV — DevConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-brand">Dev<span>Connect</span></a>
+    <a href="index.html" class="nav-link">Browse</a>
+    <a href="search.html" class="nav-link">Search</a>
+    <a href="login.html"  class="btn-ghost"  id="nav-login">Log in</a>
+    <a href="signup.html" class="btn-accent" id="nav-signup">Sign up</a>
+    <div class="user-menu-wrap" id="nav-user" style="display:none">
+      <button class="user-menu-trigger" id="nav-user-trigger">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span id="nav-username"></span>
+        <svg width="9" height="5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 9 5"><path d="M1 1l3.5 3L8 1"/></svg>
+      </button>
+      <div class="user-dropdown" id="nav-user-dropdown">
+        <a href="profile.html">My CV</a>
+        <a href="edit-cv.html">Edit CV</a>
+        <hr><button id="btn-logout">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="detail-page">
+  <div class="container" id="content">
+    <p style="color:var(--dim);padding:60px 0;text-align:center">Loading...</p>
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-brand">Dev<span>Connect</span></span>
+    <span class="footer-text">© <script>document.write(new Date().getFullYear())</script> DevConnect</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+  async function init() {
+    const user = await loadAuth();
+    const cvId = new URLSearchParams(location.search).get('id');
+    if (!cvId) { window.location.href = 'index.html'; return; }
+
+    try {
+      const data = await get('/api/cvs/' + cvId);
+      document.title = data.cv.full_name + ' - DevConnect';
+      render(data.cv, user);
+    } catch (e) {
+      document.getElementById('content').innerHTML =
+        '<div class="empty" style="padding-top:80px">' +
+          '<h3>CV not found</h3><p>This profile may no longer exist.</p>' +
+          '<a href="index.html" class="btn btn-secondary" style="margin-top:20px;display:inline-flex">Back to browse</a>' +
+        '</div>';
+    }
+  }
+
+  function render(cv, user) {
+    var initial  = (cv.full_name || '?')[0].toUpperCase();
+    var isOwner  = user && user.id === cv.user_id;
+    var skills   = cv.skills || [];
+
+    var skillTags = '';
+    for (var i = 0; i < skills.length; i++) {
+      skillTags += '<span class="tag' + (i < 3 ? ' hi' : '') + '">' + esc(skills[i]) + '</span>';
+    }
+
+    var links = '';
+    if (cv.github)    links += '<a href="' + esc(cv.github)    + '" class="link-item" target="_blank" rel="noopener">' + svgGithub()   + ' GitHub Profile</a>';
+    if (cv.portfolio) links += '<a href="' + esc(cv.portfolio)  + '" class="link-item" target="_blank" rel="noopener">' + svgGlobe()    + ' Portfolio Website</a>';
+    if (cv.linkedin)  links += '<a href="' + esc(cv.linkedin)   + '" class="link-item" target="_blank" rel="noopener">' + svgLinkedin() + ' LinkedIn</a>';
+    if (!links)       links  = '<p style="font-size:13px;color:var(--dim)">No links added.</p>';
+
+    // Email displayed in the profile panel
+    var emailHtml = '';
+    if (cv.email) {
+      emailHtml =
+        '<a href="mailto:' + esc(cv.email) + '" class="link-item" style="margin-top:8px">' +
+          '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+            '<rect x="2" y="4" width="20" height="16" rx="2"/>' +
+            '<polyline points="2,4 12,13 22,4"/>' +
+          '</svg>' +
+          esc(cv.email) +
+        '</a>';
+    }
+
+    var joinDate = new Date(cv.created_at).toLocaleDateString('en-GB', {month:'short', year:'numeric'});
+
+    var html =
+      '<a href="javascript:history.back()" class="back">' +
+        '<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>' +
+        ' Back' +
+      '</a>' +
+
+      '<div class="detail-hero">' +
+        '<div class="detail-avatar">' + initial + '</div>' +
+        '<div style="flex:1">' +
+          '<div class="detail-name">' + esc(cv.full_name) + '</div>' +
+          (cv.education ? '<div class="detail-edu">' + esc(cv.education) + '</div>' : '') +
+          (skillTags ? '<div class="tags" style="margin-top:12px">' + skillTags + '</div>' : '') +
+        '</div>' +
+        (isOwner ? '<a href="edit-cv.html" class="btn btn-secondary btn-sm">Edit CV</a>' : '') +
+      '</div>' +
+
+      '<div class="detail-body">' +
+        '<div>' +
+          (cv.education ? '<div class="panel"><div class="panel-label">Education</div><p class="panel-text">' + esc(cv.education) + '</p></div>' : '') +
+          (skillTags ? '<div class="panel"><div class="panel-label">Skills &amp; Languages</div><div class="tags">' + skillTags + '</div></div>' : '') +
+          (cv.description ? '<div class="panel"><div class="panel-label">About Me</div><p class="panel-text">' + esc(cv.description).replace(/\n/g,'<br>') + '</p></div>' : '') +
+        '</div>' +
+
+        '<div>' +
+          '<div class="panel">' +
+            '<div class="panel-label">Links</div>' +
+            links +
+          '</div>' +
+
+          '<div class="panel" style="margin-top:12px">' +
+            '<div class="panel-label">Profile</div>' +
+            '<p style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--dim);line-height:1.8;margin-bottom:8px">' +
+              '@' + esc(cv.username) + '<br>Joined ' + joinDate +
+            '</p>' +
+            emailHtml +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('content').innerHTML = html;
+  }
+
+  init();
+</script>
+</body>
+</html>

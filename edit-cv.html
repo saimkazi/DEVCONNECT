@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Edit CV — DevConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-brand">Dev<span>Connect</span></a>
+    <a href="index.html"        class="nav-link">Browse</a>
+    <a href="search.html" class="nav-link">Search</a>
+    <a href="login.html"  class="btn-ghost"  id="nav-login">Log in</a>
+    <a href="signup.html" class="btn-accent" id="nav-signup">Sign up</a>
+    <div class="user-menu-wrap" id="nav-user" style="display:none">
+      <button class="user-menu-trigger" id="nav-user-trigger">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span id="nav-username"></span>
+        <svg width="9" height="5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 9 5"><path d="M1 1l3.5 3L8 1"/></svg>
+      </button>
+      <div class="user-dropdown" id="nav-user-dropdown">
+        <a href="profile.html">My CV</a>
+        <a href="edit-cv.html">Edit CV</a>
+        <hr><button id="btn-logout">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="edit-page">
+  <div class="container">
+    <div style="margin-bottom:28px">
+      <h1 style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:#fff" id="page-title">Edit My CV</h1>
+      <p style="font-size:13px;color:var(--dim);margin-top:4px">Fill in your details to build your developer profile.</p>
+    </div>
+
+    <div class="success-msg" id="success">CV saved successfully!</div>
+    <div class="error-msg"   id="error"></div>
+
+    <div class="edit-layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-label">Sections</div>
+        <button class="tab-btn active" onclick="switchTab('basics')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Basics
+        </button>
+        <button class="tab-btn" onclick="switchTab('skills')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Skills
+        </button>
+        <button class="tab-btn" onclick="switchTab('links')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          Links
+        </button>
+        <button class="tab-btn" onclick="switchTab('settings')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          Settings
+        </button>
+
+        <div class="sidebar-save">
+          <button class="btn btn-primary" id="save-btn" style="width:100%;justify-content:center" onclick="saveCV()">
+            Save CV
+          </button>
+          <a href="profile.html" class="btn btn-secondary btn-sm"
+             style="width:100%;justify-content:center;margin-top:8px;display:flex">
+            View Profile
+          </a>
+        </div>
+      </aside>
+
+      <!-- Panels -->
+      <div>
+
+        <!-- BASICS -->
+        <div class="panel-section active" id="panel-basics">
+          <div class="edit-panel">
+            <div class="edit-panel-title">Basic Information</div>
+            <p class="edit-panel-desc">Your name, education, and profile summary.</p>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="full-name">Full Name *</label>
+                <input type="text" id="full-name" class="form-input" placeholder="e.g. Andrew Hilton" maxlength="150">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="education">Education</label>
+                <input type="text" id="education" class="form-input" placeholder="e.g. BSc Computer Science" maxlength="255">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="description">About Me</label>
+              <textarea id="description" class="form-input" rows="6" maxlength="1000"
+                placeholder="Tell people about yourself..."></textarea>
+              <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);text-align:right;margin-top:4px" id="desc-count">0 / 1000</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SKILLS -->
+        <div class="panel-section" id="panel-skills">
+          <div class="edit-panel">
+            <div class="edit-panel-title">Skills &amp; Languages</div>
+            <p class="edit-panel-desc">Tick everything you're comfortable working with.</p>
+            <div class="skill-grid" id="skill-grid"></div>
+          </div>
+        </div>
+
+        <!-- LINKS -->
+        <div class="panel-section" id="panel-links">
+          <div class="edit-panel">
+            <div class="edit-panel-title">External Links</div>
+            <p class="edit-panel-desc">Add links to your public profiles. All optional.</p>
+            <div class="form-group">
+              <label class="form-label" for="github">GitHub URL</label>
+              <input type="url" id="github" class="form-input" placeholder="https://github.com/yourusername">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="portfolio">Portfolio Website</label>
+              <input type="url" id="portfolio" class="form-input" placeholder="https://yourwebsite.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="linkedin">LinkedIn URL</label>
+              <input type="url" id="linkedin" class="form-input" placeholder="https://linkedin.com/in/yourusername">
+            </div>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div class="panel-section" id="panel-settings">
+          <div class="edit-panel">
+            <div class="edit-panel-title">Visibility &amp; Settings</div>
+            <p class="edit-panel-desc">Control who can see your CV and update your account details.</p>
+
+            <label class="vis-toggle" for="is-public">
+              <input type="checkbox" id="is-public" checked>
+              <div>
+                <strong>Make my CV public</strong>
+                <span>Public CVs appear in browse and search results.</span>
+              </div>
+            </label>
+
+            <!-- ── Change Email ─────────────────────────── -->
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border)">
+              <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;
+                          text-transform:uppercase;color:var(--dim);margin-bottom:8px">
+                Change Email
+              </div>
+              <p style="font-size:12px;color:var(--dim);margin-bottom:12px">
+                Your email is shown publicly on your CV so people can contact you.
+              </p>
+              <div class="form-group">
+                <label class="form-label" for="new-email">Email Address</label>
+                <input type="email" id="new-email" class="form-input" placeholder="you@example.com">
+              </div>
+              <div class="error-msg"   id="email-error"></div>
+              <div class="success-msg" id="email-success">Email updated successfully!</div>
+              <button class="btn btn-secondary btn-sm" onclick="changeEmail()" style="margin-top:4px">
+                Update Email
+              </button>
+            </div>
+
+            <!-- ── Danger Zone ──────────────────────────── -->
+            <div class="danger-section">
+              <p>Danger zone — this cannot be undone.</p>
+              <button class="btn-danger" onclick="deleteCV()">Delete my CV</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /panels -->
+    </div><!-- /edit-layout -->
+  </div>
+</div>
+
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-brand">Dev<span>Connect</span></span>
+    <span class="footer-text">© <script>document.write(new Date().getFullYear())</script> DevConnect</span>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+  const SKILLS = [
+    'JavaScript','TypeScript','Python','PHP','Java','C#','C++',
+    'Go','Rust','Ruby','Swift','Kotlin','HTML/CSS','SQL','Bash',
+    'Dart','R','Scala','Elixir','React','Vue','Angular','Node.js',
+    'Django','Laravel','Spring','Docker','Kubernetes','AWS','Git',
+  ];
+
+  let existingCV = null;
+
+  async function init() {
+    await requireAuth();
+
+    // Build skill checkboxes
+    const grid = document.getElementById('skill-grid');
+    SKILLS.forEach(function(s) {
+      const label = document.createElement('label');
+      label.className = 'skill-label';
+      label.innerHTML = '<input type="checkbox" value="' + esc(s) + '"> <span>' + esc(s) + '</span>';
+      grid.appendChild(label);
+    });
+
+    // Load existing CV
+    try {
+      const data = await get('/api/my-cv');
+      existingCV = data.cv;
+      fillForm(data.cv);
+
+      const viewBtn = document.querySelector('a[href="profile.html"]');
+      if (viewBtn) {
+        viewBtn.href = 'cv.html?id=' + data.cv.id;
+        viewBtn.textContent = 'View my CV';
+      }
+    } catch (e) {
+      document.getElementById('page-title').textContent = 'Create Your CV';
+    }
+
+    // Char counter
+    const desc = document.getElementById('description');
+    desc.addEventListener('input', function() {
+      document.getElementById('desc-count').textContent = desc.value.length + ' / 1000';
+    });
+  }
+
+  function fillForm(cv) {
+    document.getElementById('full-name').value    = cv.full_name   || '';
+    document.getElementById('education').value    = cv.education   || '';
+    document.getElementById('description').value  = cv.description || '';
+    document.getElementById('github').value       = cv.github      || '';
+    document.getElementById('portfolio').value    = cv.portfolio   || '';
+    document.getElementById('linkedin').value     = cv.linkedin    || '';
+    document.getElementById('is-public').checked  = !!cv.is_public;
+    document.getElementById('desc-count').textContent = (cv.description || '').length + ' / 1000';
+
+    // Pre-fill current email
+    if (cv.email) {
+      document.getElementById('new-email').value = cv.email;
+    }
+
+    // Tick matching skills
+    const selectedSkills = new Set(cv.skills || []);
+    document.querySelectorAll('#skill-grid input[type=checkbox]').forEach(function(cb) {
+      cb.checked = selectedSkills.has(cb.value);
+    });
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(function(btn, i) {
+      const names = ['basics','skills','links','settings'];
+      btn.classList.toggle('active', names[i] === name);
+    });
+    document.querySelectorAll('.panel-section').forEach(function(p) {
+      p.classList.toggle('active', p.id === 'panel-' + name);
+    });
+  }
+
+  async function saveCV() {
+    const btn       = document.getElementById('save-btn');
+    const errorEl   = document.getElementById('error');
+    const successEl = document.getElementById('success');
+
+    errorEl.classList.remove('show');
+    successEl.classList.remove('show');
+
+    const fullName = document.getElementById('full-name').value.trim();
+    if (!fullName) {
+      switchTab('basics');
+      errorEl.textContent = 'Full name is required.';
+      errorEl.classList.add('show');
+      document.getElementById('full-name').focus();
+      return;
+    }
+
+    const skills = [];
+    document.querySelectorAll('#skill-grid input:checked').forEach(function(cb) {
+      skills.push(cb.value);
+    });
+
+    const payload = {
+      full_name:   fullName,
+      education:   document.getElementById('education').value.trim()   || null,
+      description: document.getElementById('description').value.trim() || null,
+      github:      document.getElementById('github').value.trim()      || null,
+      portfolio:   document.getElementById('portfolio').value.trim()   || null,
+      linkedin:    document.getElementById('linkedin').value.trim()    || null,
+      is_public:   document.getElementById('is-public').checked,
+      skills:      skills,
+    };
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    try {
+      if (existingCV) {
+        await put('/api/cvs/' + existingCV.id, payload);
+      } else {
+        await post('/api/cvs', payload);
+        const data = await get('/api/my-cv');
+        existingCV = data.cv;
+        const viewBtn = document.querySelector('a[href="profile.html"]');
+        if (viewBtn) { viewBtn.href = 'cv.html?id=' + data.cv.id; viewBtn.textContent = 'View my CV'; }
+      }
+      successEl.classList.add('show');
+      toast('CV saved!', 'ok');
+      setTimeout(function() { successEl.classList.remove('show'); }, 3000);
+    } catch (e) {
+      errorEl.textContent = e.message;
+      errorEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save CV';
+    }
+  }
+
+  async function changeEmail() {
+    const input     = document.getElementById('new-email');
+    const errorEl   = document.getElementById('email-error');
+    const successEl = document.getElementById('email-success');
+    const email     = input.value.trim();
+
+    errorEl.classList.remove('show');
+    successEl.classList.remove('show');
+
+    if (!email) {
+      errorEl.textContent = 'Please enter an email address.';
+      errorEl.classList.add('show');
+      return;
+    }
+    if (!email.includes('@')) {
+      errorEl.textContent = 'Please enter a valid email address.';
+      errorEl.classList.add('show');
+      return;
+    }
+
+    try {
+      await put('/api/change-email', { email: email });
+      successEl.classList.add('show');
+      toast('Email updated!', 'ok');
+      setTimeout(function() { successEl.classList.remove('show'); }, 3000);
+    } catch (e) {
+      errorEl.textContent = e.message;
+      errorEl.classList.add('show');
+    }
+  }
+
+  async function deleteCV() {
+    if (!existingCV) { toast('No CV to delete.', 'bad'); return; }
+    if (!confirm('Are you sure? This permanently deletes your CV.')) return;
+    try {
+      await del('/api/cvs/' + existingCV.id);
+      existingCV = null;
+      toast('CV deleted.', 'ok');
+      setTimeout(function() { window.location.href = 'index.html'; }, 1200);
+    } catch (e) {
+      toast(e.message, 'bad');
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveCV(); }
+  });
+
+  init();
+</script>
+</body>
+</html>

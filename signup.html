@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sign Up — DevConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-brand">Dev<span>Connect</span></a>
+    <a href="login.html"  class="btn-ghost"  id="nav-login">Log in</a>
+    <a href="signup.html" class="btn-accent" id="nav-signup">Sign up</a>
+    <div class="user-menu-wrap" id="nav-user" style="display:none">
+      <button class="user-menu-trigger" id="nav-user-trigger"><span id="nav-username"></span></button>
+      <div class="user-dropdown" id="nav-user-dropdown">
+        <a href="profile.html">My CV</a>
+        <hr><button id="btn-logout">Log out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <h1 class="auth-title">Create account</h1>
+    <p class="auth-sub">Join DevConnect and publish your developer CV.</p>
+
+    <div class="error-msg" id="error"></div>
+
+    <div class="form-group">
+      <label class="form-label" for="username">Username</label>
+      <input type="text" id="username" class="form-input" placeholder="e.g. andrew_h" autocomplete="username">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="email">Email</label>
+      <input type="email" id="email" class="form-input" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">Password</label>
+      <input type="password" id="password" class="form-input" placeholder="At least 8 characters" autocomplete="new-password">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="confirm">Confirm Password</label>
+      <input type="password" id="confirm" class="form-input" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <button class="btn btn-primary" id="signup-btn" style="width:100%" onclick="doSignup()">
+      Create account
+    </button>
+
+    <div class="auth-footer">
+      Already have an account? <a href="login.html">Log in</a>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+  loadAuth().then(user => {
+    if (user) window.location.href = 'profile.html';
+  });
+
+  async function doSignup() {
+    const btn      = document.getElementById('signup-btn');
+    const errorEl  = document.getElementById('error');
+    const username = document.getElementById('username').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm  = document.getElementById('confirm').value;
+
+    errorEl.classList.remove('show');
+
+    if (!username || !email || !password) {
+      errorEl.textContent = 'All fields are required.';
+      errorEl.classList.add('show'); return;
+    }
+    if (password !== confirm) {
+      errorEl.textContent = 'Passwords do not match.';
+      errorEl.classList.add('show'); return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Creating account…';
+
+    try {
+      await post('/api/register', { username, email, password });
+      window.location.href = 'edit-cv.html?new=1';
+    } catch (e) {
+      errorEl.textContent = e.message;
+      errorEl.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Create account';
+    }
+  }
+</script>
+</body>
+</html>

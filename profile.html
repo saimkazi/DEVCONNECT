@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile — DevConnect</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div style="min-height:100vh;display:grid;place-items:center">
+  <p style="font-family:'DM Mono',monospace;font-size:13px;color:var(--dim)">Loading your profile…</p>
+</div>
+<script src="app.js"></script>
+<script>
+  async function go() {
+    const user = await requireAuth();
+    if (!user) return;
+    try {
+      const { cv } = await get('/api/my-cv');
+      window.location.replace(`cv.html?id=${cv.id}`);
+    } catch {
+      window.location.replace('edit-cv.html?new=1');
+    }
+  }
+  go();
+</script>
+</body>
+</html>
