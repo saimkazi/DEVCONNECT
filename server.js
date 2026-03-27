@@ -21,7 +21,9 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT || 21320),
   charset: 'utf8mb4',
-  ssl: {},
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 let dbOk = false;
