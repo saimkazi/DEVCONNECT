@@ -15,19 +15,26 @@ const PORT = 3000;
 // DATABASE - put your MySQL password here
 // ============================================================
 const db = mysql.createPool({
-  host: 'gondola.proxy.rlwy.net',
-  user: 'root',
-  password: 'XreVVpdqEIILMzGCeuJLLmGeMcUwHsHL',
-  database: 'railway',
-  port: 30583
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT || 21320),
+  charset: 'utf8mb4',
+  ssl: {},
 });
 
 let dbOk = false;
 db.getConnection()
-  .then(conn => {
+  .then(async conn => {
     dbOk = true;
     console.log('MySQL connected OK');
     conn.release();
+    try {
+      await initSchema();
+    } catch (err) {
+      console.error('Schema init failed:', err);
+    }
   })
   .catch(e => {
     console.error('MySQL FAILED: ' + e.message);
@@ -74,8 +81,6 @@ async function initSchema() {
 
   console.log('Tables created or already exist');
 }
-
-initSchema().catch(err => console.error('Schema init failed:', err));
 
 // ============================================================
 // MIDDLEWARE
