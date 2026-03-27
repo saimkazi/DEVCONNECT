@@ -15,11 +15,11 @@ const PORT = 3000;
 // DATABASE - put your MySQL password here
 // ============================================================
 const db = mysql.createPool({
-  host:     'localhost',
-  user:     'root',
-  password: '',           // <-- YOUR MYSQL PASSWORD HERE
-  database: 'devconnect',
-  charset:  'utf8mb4',
+  host: 'gondola.proxy.rlwy.net',
+  user: 'root',
+  password: 'XreVVpdqEIILMzGCeuJLLmGeMcUwHsHL',
+  database: 'railway',
+  port: 30583
 });
 
 let dbOk = false;
@@ -32,6 +32,50 @@ db.getConnection()
   .catch(e => {
     console.error('MySQL FAILED: ' + e.message);
   });
+
+// ============================================================
+// AUTO CREATE TABLES (FOR RAILWAY)
+// ============================================================
+async function initSchema() {
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(50) NOT NULL UNIQUE,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS cvs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      user_id INT NOT NULL,
+      full_name VARCHAR(150) NOT NULL,
+      education VARCHAR(255),
+      description TEXT,
+      github VARCHAR(255),
+      portfolio VARCHAR(255),
+      linkedin VARCHAR(255),
+      is_public TINYINT(1) DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY one_cv_per_user (user_id)
+    )
+  `);
+
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS cv_skills (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      cv_id INT NOT NULL,
+      skill_name VARCHAR(60) NOT NULL
+    )
+  `);
+
+  console.log('Tables created or already exist');
+}
+
+initSchema().catch(err => console.error('Schema init failed:', err));
 
 // ============================================================
 // MIDDLEWARE
